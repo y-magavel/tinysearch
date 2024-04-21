@@ -70,7 +70,7 @@ func NewIndex() *Index {
 }
 
 func (p *Posting) String() string {
-	return fmt.Sprintf("(%v,%v,%v)", p.DocID, p.TermFrequency, p.Positions)
+	return fmt.Sprintf("(DocID: %v, TermFrequency: %v, Positions: %v)", p.DocID, p.TermFrequency, p.Positions)
 }
 
 func (pl *PostingList) String() string {

@@ -1,8 +1,10 @@
 package tinysearch
 
 import (
-	"reflect"
 	"testing"
+
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 )
 
 func TestSearchTopK(t *testing.T) {
@@ -16,7 +18,7 @@ func TestSearchTopK(t *testing.T) {
 		},
 	}
 
-	for !reflect.DeepEqual(actual, expected) {
+	if diff := cmp.Diff(actual, expected, cmpopts.EquateApprox(0, 1e-9), cmp.AllowUnexported(TopDocs{}, ScoreDoc{})); diff != "" {
 		t.Fatalf("got:\n%v\nexpected:%v\n", actual, expected)
 	}
 }

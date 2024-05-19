@@ -2,10 +2,11 @@ package tinysearch
 
 import (
 	"database/sql"
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"io"
 	"log"
 	"os"
-	"reflect"
 	"strings"
 	"testing"
 
@@ -117,8 +118,7 @@ func TestSearch(t *testing.T) {
 		{1, 1.1699250014423126, "test1"},
 	}
 
-	for !reflect.DeepEqual(actual, expected) {
+	if diff := cmp.Diff(actual, expected, cmpopts.EquateApprox(0, 1e-9), cmp.AllowUnexported()); diff != "" {
 		t.Fatalf("\ngot:\n%v\nwant:\n%v\n", actual, expected)
 	}
-
 }

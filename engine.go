@@ -2,6 +2,7 @@ package tinysearch
 
 import (
 	"database/sql"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -45,4 +46,33 @@ func (e *Engine) AddDocument(title string, reader io.Reader) error {
 func (e *Engine) Flush() error {
 	writer := NewIndexeWriter(e.indexDir)
 	return writer.Flush(e.indexer.index)
+}
+
+func (e *Engine) Search(query string, k int) ([]*SearchResult, error) {
+	terms := e.tokenizer.TextToWordSequence(query)
+
+	docs := NewSearcher(e.indexDir).SearchTopK(terms, k)
+
+	results := make([]*SearchResult, 0, k)
+	for _, result := range docs.scoreDocs {
+		title, err := e.documentStore.fetchTitle(result.docID)
+		if err != nil {
+			return nil, err
+		}
+		results = append(results, &SearchResult{
+			result.docID, result.score, title,
+		})
+	}
+	return results, nil
+}
+
+type SearchResult struct {
+	DocID DocumentID
+	Score float64
+	Title string
+}
+
+func (r *SearchResult) String() string {
+	return fmt.Sprintf("{DocID: %v, Score: %v, Title: %v}",
+		r.DocID, r.Score, r.Title)
 }

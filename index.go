@@ -124,3 +124,44 @@ func (idx *Index) String() string {
 	}
 	return fmt.Sprintf("total documents : %v\ndictionary:\n%v\n", idx.TotalDocsCount, strings.Join(strs, "\n"))
 }
+
+type Cursor struct {
+	postingsList *PostingList  // cursorがたどっているポスティングリストへの参照
+	current      *list.Element // 現在の読み込み位置
+}
+
+func (pl PostingList) OpenCursor() *Cursor {
+	return &Cursor{
+		postingsList: &pl,
+		current:      pl.Front(),
+	}
+}
+
+func (c *Cursor) Next() {
+	c.current = c.current.Next()
+}
+
+func (c *Cursor) NextDoc(id DocumentID) {
+	for !c.Empty() && c.DocId() < id {
+		c.Next()
+	}
+}
+
+func (c *Cursor) Empty() bool {
+	if c.current == nil {
+		return true
+	}
+	return false
+}
+
+func (c *Cursor) Posting() *Posting {
+	return c.current.Value.(*Posting)
+}
+
+func (c *Cursor) DocId() DocumentID {
+	return c.current.Value.(*Posting).DocID
+}
+
+func (c *Cursor) String() string {
+	return fmt.Sprint(c.Posting())
+}
